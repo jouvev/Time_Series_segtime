@@ -1,0 +1,24 @@
+Unique index   -   Track name   -   Label name
+
+101   -   Locomotion   -   Stand
+102   -   Locomotion   -   Walk
+104   -   Locomotion   -   Sit
+105   -   Locomotion   -   Lie
+506616   -   Gestures   -   Open_Door1
+506617	 -   Gestures   -   Open_Door2
+504616   -   Gestures   -   Close_Door1
+504617   -   Gestures   -   Close_Door2
+506620   -   Gestures   -   Open_Fridge
+504620   -   Gestures   -   Close_Fridge
+506605	 -   Gestures   -   Open_Dishwasher
+504605	 -   Gestures   -   Close_Dishwasher
+506619   -   Gestures   -   Open_Drawer1
+504619   -   Gestures   -   Close_Drawer1
+506611   -   Gestures   -   Open_Drawer2
+504611   -   Gestures   -   Close_Drawer2
+506608   -   Gestures   -   Open_Drawer3
+504608   -   Gestures   -   Close_Drawer3
+508612   -   Gestures   -   Clean_Table
+507621   -   Gestures   -   Drink_Cup
+505606   -   Gestures   -   Toggle_Switch
+
