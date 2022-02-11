@@ -93,7 +93,7 @@ class Res1DNet(nn.Module):
     
 
 class AMSP(nn.Module):
-    def __init__(self, input_channel, output_stride, BatchNorm):
+    def __init__(self, input_channel, output_stride):
         super(AMSP, self).__init__()
         
         inplanes = min(input_channel*32, 1024)
@@ -105,15 +105,15 @@ class AMSP(nn.Module):
         else:
             raise NotImplementedError
             
-        self.amsp1 = _AMSPModule(inplanes, amsp_channel, 1, padding=0, dilation=dilations[0], BatchNorm=BatchNorm)
-        self.amsp2 = _AMSPModule(inplanes, amsp_channel, 3, padding=dilations[1], dilation=dilations[1], BatchNorm=BatchNorm)
-        self.amsp3 = _AMSPModule(inplanes, amsp_channel, 3, padding=dilations[2], dilation=dilations[2], BatchNorm=BatchNorm)
-        self.amsp4 = _AMSPModule(inplanes, amsp_channel, 3, padding=dilations[3], dilation=dilations[3], BatchNorm=BatchNorm)
+        self.amsp1 = _AMSPModule(inplanes, amsp_channel, 1, padding=0, dilation=dilations[0])
+        self.amsp2 = _AMSPModule(inplanes, amsp_channel, 3, padding=dilations[1], dilation=dilations[1])
+        self.amsp3 = _AMSPModule(inplanes, amsp_channel, 3, padding=dilations[2], dilation=dilations[2])
+        self.amsp4 = _AMSPModule(inplanes, amsp_channel, 3, padding=dilations[3], dilation=dilations[3])
         self.global_avg_pool = nn.Sequential(nn.AdaptiveAvgPool1d(1),
                                              nn.Conv1d(inplanes, amsp_channel, 1, stride=1, bias=False),
                                              nn.ReLU())
         self.conv1 = nn.Conv1d(amsp_channel*5, amsp_channel, 1, bias=False)
-        self.bn1 = BatchNorm(amsp_channel)
+        self.bn1 = nn.BatchNorm1d(amsp_channel)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.5)
         self._init_weight()
@@ -142,11 +142,11 @@ class AMSP(nn.Module):
                 m.bias.data.zero_()
     
 class _AMSPModule(nn.Module):
-    def __init__(self, in_size, out_size, kernel_size, padding, dilation, BatchNorm):
+    def __init__(self, in_size, out_size, kernel_size, padding, dilation):
         super(_AMSPModule, self).__init__()
         self.atrous_conv = nn.Conv1d(in_size, out_size, kernel_size=kernel_size,
                                             stride=1, padding=padding, dilation=dilation, bias=False)
-        self.bn = BatchNorm(out_size)
+        self.bn = nn.BatchNorm1d(out_size)
         self.relu = nn.ReLU()
 
         self._init_weight()
@@ -166,19 +166,14 @@ class _AMSPModule(nn.Module):
                 m.bias.data.zero_()
                      
 class Encoder(nn.Module):
-    def __init__(self, input_channel, output_stride=8, channel_last_data=True): #sync_bn=True,
+    def __init__(self, input_channel, output_stride=8): #sync_bn=True,
         super(Encoder, self).__init__()
-        BatchNorm = nn.BatchNorm1d
         
-        self.resnet1d = Res1DNet(input_channel, Bottleneck1D, [2, 2, 4, 2], output_stride, nn.BatchNorm1d, pretrained=False)
+        self.resnet1d = Res1DNet(input_channel, [2, 2, 4, 2], output_stride)
         
-        self.amsp = AMSP(input_channel, output_stride, BatchNorm)
-        self.channel_last_data = channel_last_data
+        self.amsp = AMSP(input_channel, output_stride)
 
     def forward(self, input):
-        if self.channel_last_data:# swap data axis
-            input = input.permute(0,2,1)
-
         x, low_level_feat = self.resnet1d(input)
         x = self.amsp(x) 
 

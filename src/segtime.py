@@ -11,7 +11,7 @@ class Segtime(nn.Module):
         super(Segtime,self).__init__()
         self.mss = MSSLSTM(input_size,k_list,h_size_list)
         self.dropout = nn.Dropout(p_drop)
-        self.encoder = Encoder()
+        self.encoder = Encoder(input_size,8)
         self.decoder = Decoder(input_size,num_classes,latent_size*2,int(latent_size*1.5))
         self.stepwise = Stepwise(sum(h_size_list)+num_classes,num_classes,resoultion)
         
