@@ -32,7 +32,7 @@ class MyDataset(torch.utils.data.Dataset):
 
 # #Get data and locate in to given path
 # files = eegbci.load_data(subject, runs, '../datasets/')
-def getDataLoad(subject=[1], recording=[1], path = "./data"):
+def getDataLoad(subject=[1], recording=[1], path = "./data/Sleep"):
     edf = sleep_physionet.age.fetch_data(subjects=subject, recording=recording, path=path)#"D:/all/travail/m2_info/AMAL/projet/data"
     edf = np.array(edf)
     raws = [read_raw_edf(f, preload=True) for f in edf[:,0]]
