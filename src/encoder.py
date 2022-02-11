@@ -93,11 +93,11 @@ class Res1DNet(nn.Module):
     
 
 class AMSP(nn.Module):
-    def __init__(self, input_channel, output_stride):
+    def __init__(self, input_channel, amsp_channel,output_stride):
         super(AMSP, self).__init__()
         
         inplanes = min(input_channel*32, 1024)
-        amsp_channel = min(256, input_channel*8)
+        #amsp_channel = min(256, input_channel*8)
         if output_stride == 16:
             dilations = [1, 6, 12, 18]
         elif output_stride == 8:
@@ -147,12 +147,12 @@ class _AMSPModule(nn.Module):
         return self.relu(x)
                      
 class Encoder(nn.Module):
-    def __init__(self, input_channel,latent_size, output_stride=8): #sync_bn=True,
+    def __init__(self, input_channel,latent_size,amsp_channel, output_stride=8): #sync_bn=True,
         super(Encoder, self).__init__()
         
         self.resnet1d = Res1DNet(input_channel,latent_size, [2, 2, 4, 2], output_stride)
         
-        self.amsp = AMSP(input_channel, output_stride)
+        self.amsp = AMSP(input_channel,amsp_channel, output_stride)
 
     def forward(self, input):
         x, low_level_feat = self.resnet1d(input)
