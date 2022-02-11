@@ -46,7 +46,7 @@ class Res1DNet(nn.Module):
         self.bn1 = nn.BatchNorm1d(latent_size)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)
-        self.inplanes = latent_size
+        self.in_size = latent_size
         if output_stride == 16:
             strides = [1, 2, 2, 1]
             dilations = [1, 1, 1, 2]
@@ -56,16 +56,24 @@ class Res1DNet(nn.Module):
         else:
             raise NotImplementedError
         
-        self.layer1 = self._layer(in_size, nb_blocks[0], stride=strides[0], dilation=dilations[0])
-        self.layer2 = self._layer(in_size*2, nb_blocks[1], stride=strides[1], dilation=dilations[1])
-        self.layer3 = self._layer(in_size*4, nb_blocks[2], stride=strides[2], dilation=dilations[2])
-        self.layer4 = self._layer(in_size*8, nb_blocks[3], stride=strides[3], dilation=dilations[3])
+        self.layer1 = self._layer(latent_size, nb_blocks[0], stride=strides[0], dilation=dilations[0])
+        self.layer2 = self._layer(latent_size*2, nb_blocks[1], stride=strides[1], dilation=dilations[1])
+        self.layer3 = self._layer(latent_size*4, nb_blocks[2], stride=strides[2], dilation=dilations[2])
+        self.layer4 = self._layer(latent_size*8, nb_blocks[3], stride=strides[3], dilation=dilations[3])
         
     def _layer(self,latent_size,nb_block,stride=1,dilation=1):
+        downsample = None
+        if stride != 1 or self.in_size != latent_size * Bottleneck1D.expansion:
+            downsample = nn.Sequential(
+                nn.Conv1d(self.in_size, latent_size * Bottleneck1D.expansion,
+                          kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm1d(latent_size * Bottleneck1D.expansion),
+            )
         layers = []
-        layers.append(Bottleneck1D(self.inplanes, Bottleneck1D.expansion*latent_size, stride, dilation))
+        layers.append(Bottleneck1D(self.in_size, latent_size, stride, dilation,downsample))
+        self.in_size = latent_size * Bottleneck1D.expansion
         for i in range(1, nb_block):
-            layers.append(Bottleneck1D(Bottleneck1D.expansion*latent_size, latent_size, dilation=dilation))
+            layers.append(Bottleneck1D(self.in_size, latent_size, dilation=dilation))
             
         return nn.Sequential(*layers)
     
