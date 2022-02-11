@@ -27,4 +27,4 @@ class Decoder(nn.Module):
         x = F.interpolate(x, size=low_level.size()[2:], mode='linear', align_corners=True)
         x = torch.cat((x, low_level), dim=1)
         
-        return self.last_conv(x)
+        return self.conv(x)
