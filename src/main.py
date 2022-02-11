@@ -12,7 +12,7 @@ device = 'cuda'
 ds = OpportunityDS('data/Opportunity/train')
 dl = DataLoader(ds,batch_size=BATCH_SIZE)
 
-model = Segtime(113,[1,4,16,64],[2,2,2,2],5).to(device)
+model = Segtime(113,[1,4,16,64],[2,2,2,2],5,64).to(device)
 optim = Adam(model.parameters(),lr=0.1)
 criterion = CrossEntropyLoss()
 

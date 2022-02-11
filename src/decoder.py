@@ -10,7 +10,7 @@ class Decoder(nn.Module):
         self.batchnorm_lowf = nn.BatchNorm1d(out_lowf)
         
         self.conv = nn.Sequential(
-            nn.Conv1d(in_x+in_lowf, in_x, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv1d(in_x+out_lowf, in_x, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm1d(in_x),
             nn.ReLU(),
             nn.Dropout(0.5),

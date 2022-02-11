@@ -116,7 +116,6 @@ class AMSP(nn.Module):
         self.bn1 = nn.BatchNorm1d(amsp_channel)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.5)
-        self._init_weight()
 
     def forward(self, x):
         x1 = self.amsp1(x)
@@ -132,14 +131,6 @@ class AMSP(nn.Module):
         x = self.relu(x)
 
         return self.dropout(x)
-
-    def _init_weight(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv1d):
-                torch.nn.init.kaiming_normal_(m.weight)
-            elif isinstance(m, nn.BatchNorm1d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
     
 class _AMSPModule(nn.Module):
     def __init__(self, in_size, out_size, kernel_size, padding, dilation):
@@ -149,27 +140,17 @@ class _AMSPModule(nn.Module):
         self.bn = nn.BatchNorm1d(out_size)
         self.relu = nn.ReLU()
 
-        self._init_weight()
-
     def forward(self, x):
         x = self.atrous_conv(x)
         x = self.bn(x)
 
         return self.relu(x)
-
-    def _init_weight(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv1d):
-                torch.nn.init.kaiming_normal_(m.weight)
-            else:
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
                      
 class Encoder(nn.Module):
-    def __init__(self, input_channel, output_stride=8): #sync_bn=True,
+    def __init__(self, input_channel,latent_size, output_stride=8): #sync_bn=True,
         super(Encoder, self).__init__()
         
-        self.resnet1d = Res1DNet(input_channel, [2, 2, 4, 2], output_stride)
+        self.resnet1d = Res1DNet(input_channel,latent_size, [2, 2, 4, 2], output_stride)
         
         self.amsp = AMSP(input_channel, output_stride)
 
