@@ -20,7 +20,7 @@ class Segtime(nn.Module):
         out_mss = self.mss(x).permute(0,2,1)# car conv1d B*C*L
         out_enc, low_f = self.encoder(x.permute(0,2,1))
         out_dec = self.decoder(low_f,out_enc)
-        out_dec = F.interpolate(x, size=x.size()[0], mode='linear', align_corners=True)
+        out_dec = F.interpolate(out_dec, size=x.size()[1], mode='linear', align_corners=True)
         out = torch.cat((out_mss,out_dec),dim=1)
         out = self.dropout(out)
         out = self.stepwise(out)
