@@ -7,7 +7,7 @@ from torch.nn import CrossEntropyLoss
 
 BATCH_SIZE = 1
 EPOCH_MAX = 20
-device = 'cuda'
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 ds = OpportunityDS('data/Opportunity/train')
 dl = DataLoader(ds,batch_size=BATCH_SIZE)
