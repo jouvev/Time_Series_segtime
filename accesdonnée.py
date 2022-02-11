@@ -1,3 +1,4 @@
+from this import d
 from mne.datasets import sleep_physionet
 from mne.io import concatenate_raws, read_raw_edf
 
@@ -9,6 +10,21 @@ import mne
 import numpy as np
 
 import matplotlib.pyplot as plt
+import torch
+
+
+class MyDataset(torch.utils.data.Dataset):
+    def __init__(self,x,y):
+        super().__init__()
+        self.x = x 
+        self.y = y
+    
+    def __getitem__(self,i):
+        return self.x,self.y
+    
+    def __len__(self):
+        return 1
+
 
 # #Define the parameters 
 # subject = 1  # use data from subject 1
@@ -16,6 +32,33 @@ import matplotlib.pyplot as plt
 
 # #Get data and locate in to given path
 # files = eegbci.load_data(subject, runs, '../datasets/')
+def getDataLoad(subject=[1], recording=[1], path = "./data"):
+    edf = sleep_physionet.age.fetch_data(subjects=subject, recording=recording, path=path)#"D:/all/travail/m2_info/AMAL/projet/data"
+    edf = np.array(edf)
+    raws = [read_raw_edf(f, preload=True) for f in edf[:,0]]
+    annots = [mne.read_annotations(f) for f in edf[:,1]]
+    raws_annot = [raws[i].set_annotations(annots[i], emit_warning=False)  for i in range(len(raws))]
+    raw_obj = concatenate_raws(raws_annot)
+    
+    x = torch.tensor(raw_obj.get_data().T)
+    full_annots = np.array(raw_obj.annotations)
+    
+    annotation_desc_2_event_id = {'Sleep stage W': 1,
+                              'Sleep stage 1': 2,
+                              'Sleep stage 2': 3,
+                              'Sleep stage 3': 4,
+                              'Sleep stage 4': 4,
+                              'Sleep stage R': 5,
+                              'Sleep stage ?':0,
+                              "BAD boundary":0,
+                              "EDGE boundary":0,
+                              'Movement time':0}
+    
+    list_annots = [torch.ones((int(i["duration"])*100)) * annotation_desc_2_event_id[i["description"]] for i in full_annots if annotation_desc_2_event_id[i["description"]]!=0]
+    y = torch.cat(list_annots, axis=0)
+    dataset = MyDataset(x, y)
+    
+    return torch.utils.data.DataLoader(dataset)
 
 
 edf = sleep_physionet.age.fetch_data(subjects=[0], recording=[1], path="D:/all/travail/m2_info/AMAL/projet/data")
