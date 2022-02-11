@@ -1,5 +1,6 @@
 from torch import nn
 from torch.nn import functional as F
+import torch 
 
 class Bottleneck1D(nn.Module):
     expansion = 2
@@ -136,9 +137,6 @@ class AMSP(nn.Module):
         for m in self.modules():
             if isinstance(m, nn.Conv1d):
                 torch.nn.init.kaiming_normal_(m.weight)
-            elif isinstance(m, SynchronizedBatchNorm1d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
             elif isinstance(m, nn.BatchNorm1d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
@@ -166,9 +164,7 @@ class _AMSPModule(nn.Module):
             else:
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
-                
-                
-                
+                     
 class Encoder(nn.Module):
     def __init__(self, input_channel, output_stride=8, channel_last_data=True): #sync_bn=True,
         super(Encoder, self).__init__()
