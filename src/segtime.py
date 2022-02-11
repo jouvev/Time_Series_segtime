@@ -4,6 +4,7 @@ from src.stepwise import Stepwise
 from src.encoder import Encoder
 from src.decoder import Decoder
 from torch import dropout, nn
+from torch.nn import functional as F
 
 
 class Segtime(nn.Module):
@@ -11,7 +12,7 @@ class Segtime(nn.Module):
         super(Segtime,self).__init__()
         self.mss = MSSLSTM(input_size,k_list,h_size_list)
         self.dropout = nn.Dropout(p_drop)
-        self.encoder = Encoder(input_size,64,8)
+        self.encoder = Encoder(input_size,64,256,8)
         self.decoder = Decoder(amsp_channel,num_classes,latent_size*2,int(latent_size*1.5))
         self.stepwise = Stepwise(sum(h_size_list)+num_classes,num_classes,resoultion)
         
@@ -19,6 +20,7 @@ class Segtime(nn.Module):
         out_mss = self.mss(x).permute(0,2,1)# car conv1d B*C*L
         out_enc, low_f = self.encoder(x.permute(0,2,1))
         out_dec = self.decoder(low_f,out_enc)
+        out_dec = F.interpolate(x, size=x.size()[0], mode='linear', align_corners=True)
         out = torch.cat((out_mss,out_dec),dim=1)
         out = self.dropout(out)
         out = self.stepwise(out)

@@ -156,6 +156,6 @@ class Encoder(nn.Module):
 
     def forward(self, input):
         x, low_level_feat = self.resnet1d(input)
-        x = self.amsp(x) 
+        x = self.amsp(x)
 
         return x, low_level_feat
