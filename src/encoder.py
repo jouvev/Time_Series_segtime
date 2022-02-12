@@ -96,8 +96,6 @@ class AMSP(nn.Module):
     def __init__(self, input_channel, amsp_channel,output_stride):
         super(AMSP, self).__init__()
         
-        inplanes = 1024
-        #amsp_channel = min(256, input_channel*8)
         if output_stride == 16:
             dilations = [1, 6, 12, 18]
         elif output_stride == 8:
@@ -105,12 +103,12 @@ class AMSP(nn.Module):
         else:
             raise NotImplementedError
             
-        self.amsp1 = _AMSPModule(inplanes, amsp_channel, 1, padding=0, dilation=dilations[0])
-        self.amsp2 = _AMSPModule(inplanes, amsp_channel, 3, padding=dilations[1], dilation=dilations[1])
-        self.amsp3 = _AMSPModule(inplanes, amsp_channel, 3, padding=dilations[2], dilation=dilations[2])
-        self.amsp4 = _AMSPModule(inplanes, amsp_channel, 3, padding=dilations[3], dilation=dilations[3])
+        self.amsp1 = _AMSPModule(input_channel, amsp_channel, 1, padding=0, dilation=dilations[0])
+        self.amsp2 = _AMSPModule(input_channel, amsp_channel, 3, padding=dilations[1], dilation=dilations[1])
+        self.amsp3 = _AMSPModule(input_channel, amsp_channel, 3, padding=dilations[2], dilation=dilations[2])
+        self.amsp4 = _AMSPModule(input_channel, amsp_channel, 3, padding=dilations[3], dilation=dilations[3])
         self.global_avg_pool = nn.Sequential(nn.AdaptiveAvgPool1d(1),
-                                             nn.Conv1d(inplanes, amsp_channel, 1, stride=1, bias=False),
+                                             nn.Conv1d(input_channel, amsp_channel, 1, stride=1, bias=False),
                                              nn.ReLU())
         self.conv1 = nn.Conv1d(amsp_channel*5, amsp_channel, 1, bias=False)
         self.bn1 = nn.BatchNorm1d(amsp_channel)
@@ -152,7 +150,7 @@ class Encoder(nn.Module):
         
         self.resnet1d = Res1DNet(input_channel,latent_size, [2, 2, 4, 2], output_stride)
         
-        self.amsp = AMSP(input_channel,amsp_channel, output_stride)
+        self.amsp = AMSP(latent_size*8*(Bottleneck1D.expansion),amsp_channel, output_stride)
 
     def forward(self, input):
         x, low_level_feat = self.resnet1d(input)

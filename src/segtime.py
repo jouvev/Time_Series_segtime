@@ -8,11 +8,11 @@ from torch.nn import functional as F
 
 
 class Segtime(nn.Module):
-    def __init__(self,input_size,k_list,h_size_list,num_classes,latent_size,amsp_channel,resoultion=1,p_drop=0.2):
+    def __init__(self,input_size,k_list,h_size_list,num_classes,latent_size,amsp_channel,output_stride=8,resoultion=1,p_drop=0.2):
         super(Segtime,self).__init__()
         self.mss = MSSLSTM(input_size,k_list,h_size_list)
         self.dropout = nn.Dropout(p_drop)
-        self.encoder = Encoder(input_size,64,256,8)
+        self.encoder = Encoder(input_size,latent_size,amsp_channel,output_stride)
         self.decoder = Decoder(amsp_channel,num_classes,latent_size*2,int(latent_size*1.5))
         self.stepwise = Stepwise(sum(h_size_list)+num_classes,num_classes,resoultion)
         
