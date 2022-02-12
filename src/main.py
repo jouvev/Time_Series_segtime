@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 from pandas import read_csv,concat
+from accesdonnée import getDataLoad
 
 BATCH_SIZE = 20
 EPOCH_MAX = 200
