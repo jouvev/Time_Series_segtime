@@ -8,10 +8,10 @@ from pandas import read_csv,concat
 from accesdonnée import getDataLoad
 
 BATCH_SIZE = 20
-EPOCH_MAX = 20
+EPOCH_MAX = 200
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-test = False
-oportunity = False
+test = True
+oportunity = True
 LENGHT=600
 #device = 'cuda'
 
@@ -23,26 +23,28 @@ if oportunity:
     dstest = OpportunityDS(dftest)
     dltrain = DataLoader(dstrain,batch_size=BATCH_SIZE,shuffle=True)
     dltest = DataLoader(dstest,batch_size=BATCH_SIZE,shuffle=True)
-    model = Segtime(113,[1,4,16,64],[10,10,10,10],18,64,256).to(device)
+    model = Segtime(113,[1,4,16,64],[10,10,10,10],5,64,256).to(device)
 else:
     dltrain = getDataLoad(subject=[1,2], recording=[1,2],lenght = LENGHT, batchsize=BATCH_SIZE)
     model = Segtime(7,[1,4,16,64],[10,10,10,10],6,64,256).to(device).double()
 
 
-optim = Adam(model.parameters(),lr=0.1)
+optim = Adam(model.parameters(),lr=0.01)
 criterion = CrossEntropyLoss()
 
 for e in range(EPOCH_MAX):
+    model.train()
     for x,y1,y2 in dltrain:
         x = x.to(device)
         y = y1.to(device)
         output = model(x)
-        loss = criterion(output,y.type(torch.LongTensor))
+        loss = criterion(output,y.long())
         optim.zero_grad()
         loss.backward()
         optim.step()
         
     with torch.no_grad():
+        model.eval()
         acc = 0
         nb_ex = 0
         l_g = 0
