@@ -26,7 +26,7 @@ if oportunity:
     model = Segtime(113,[1,4,16,64],[10,10,10,10],18,64,256).to(device)
 else:
     dltrain = getDataLoad(subject=[1,2], recording=[1,2],lenght = LENGHT, batchsize=BATCH_SIZE)
-    model = Segtime(7,[1,4,16,64],[10,10,10,10],18,64,256).to(device).double()
+    model = Segtime(7,[1,4,16,64],[10,10,10,10],6,64,256).to(device).double()
 
 
 optim = Adam(model.parameters(),lr=0.1)
