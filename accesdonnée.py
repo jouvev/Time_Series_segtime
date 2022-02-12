@@ -16,15 +16,15 @@ import torch
 class MyDataset(torch.utils.data.Dataset):
     def __init__(self,x,y, lenght = 600):
         super().__init__()
-        self.x = x 
+        self.x = x.double()
         self.y = y
         self.lenght = lenght
     
     def __getitem__(self,i):
-        return self.x[i*self.lenght:(i+1)*self.lenght],self.y[i*self.lenght:(i+1)*self.lenght]
+        return self.x[i*self.lenght:(i+1)*self.lenght],self.y[i*self.lenght:(i+1)*self.lenght], 0
     
     def __len__(self):
-        return int(self.x.size(0)/self.taille)
+        return int(self.x.size(0)/self.lenght)
 
 
 # #Define the parameters 
@@ -33,7 +33,7 @@ class MyDataset(torch.utils.data.Dataset):
 
 # #Get data and locate in to given path
 # files = eegbci.load_data(subject, runs, '../datasets/')
-def getDataLoad(subject=[1], recording=[1], path = "./data/Sleep"):
+def getDataLoad(subject=[1], recording=[1], path = "./data/Sleep", lenght=600, batchsize=20):
     edf = sleep_physionet.age.fetch_data(subjects=subject, recording=recording, path=path)#"D:/all/travail/m2_info/AMAL/projet/data"
     edf = np.array(edf)
     raws = [read_raw_edf(f, preload=True) for f in edf[:,0]]
@@ -57,9 +57,9 @@ def getDataLoad(subject=[1], recording=[1], path = "./data/Sleep"):
     
     list_annots = [torch.ones((int(i["duration"])*100)) * annotation_desc_2_event_id[i["description"]] for i in full_annots if annotation_desc_2_event_id[i["description"]]!=0]
     y = torch.cat(list_annots, axis=0)
-    dataset = MyDataset(x, y)
+    dataset = MyDataset(x, y, lenght)
     
-    return torch.utils.data.DataLoader(dataset)
+    return torch.utils.data.DataLoader(dataset,batch_size=batchsize)
 
 
 # edf = sleep_physionet.age.fetch_data(subjects=[0], recording=[1], path="D:/all/travail/m2_info/AMAL/projet/data")

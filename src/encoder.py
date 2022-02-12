@@ -96,7 +96,7 @@ class AMSP(nn.Module):
     def __init__(self, input_channel, amsp_channel,output_stride):
         super(AMSP, self).__init__()
         
-        inplanes = min(input_channel*32, 1024)
+        inplanes = 1024
         #amsp_channel = min(256, input_channel*8)
         if output_stride == 16:
             dilations = [1, 6, 12, 18]
