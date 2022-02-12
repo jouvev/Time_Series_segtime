@@ -14,16 +14,17 @@ import torch
 
 
 class MyDataset(torch.utils.data.Dataset):
-    def __init__(self,x,y):
+    def __init__(self,x,y, lenght = 600):
         super().__init__()
         self.x = x 
         self.y = y
+        self.lenght = lenght
     
     def __getitem__(self,i):
-        return self.x,self.y
+        return self.x[i*self.lenght:(i+1)*self.lenght],self.y[i*self.lenght:(i+1)*self.lenght]
     
     def __len__(self):
-        return 1
+        return int(self.x.size(0)/self.taille)
 
 
 # #Define the parameters 
