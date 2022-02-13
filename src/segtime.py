@@ -9,6 +9,19 @@ from torch.nn import functional as F
 
 class Segtime(nn.Module):
     def __init__(self,input_size,k_list,h_size_list,num_classes,latent_size,amsp_channel,output_stride=8,resoultion=1,p_drop=0.2):
+        """Module segtime
+
+        Args:
+            input_size (int): nombre de chanel en input
+            k_list (list[int]): list des pas pour mss-lstm
+            h_size_list (list[int]): list des tailles des h pour mss-lstm
+            num_classes (int): nombre de classe
+            latent_size (int): nombre de filtre pour encoder
+            amsp_channel (int): nombre de filtre pour aspm
+            output_stride (int, optional): [description]. Defaults to 8.
+            resoultion (int, optional): [description]. Defaults to 1.
+            p_drop (float, optional): [description]. Defaults to 0.2.
+        """
         super(Segtime,self).__init__()
         self.mss = MSSLSTM(input_size,k_list,h_size_list)
         self.dropout = nn.Dropout(p_drop)
